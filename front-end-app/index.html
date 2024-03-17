@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<link href='https://fonts.googleapis.com/css?family=Roboto:300,400,600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="style.css">
+    <title>Species Prediction Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        h2 {
+          display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="back">
+        <canvas id="canvas" class="canvas-back"></canvas>
+        <div class="backRight">    
+        </div>
+        <div class="backLeft">
+        </div>
+      </div>
+      
+      <div id="slideBox">
+        <div class="topLayer">
+          <div class="left">
+            <div class="content">
+            </div>
+          </div>
+          <div class="right">
+            <div class="content">
+              <h2>Fish Species Prediction</h2>
+              <form id="speciesForm">
+                <div class="form-element form-stack">
+                  <label for="category">Choose a category for prediction:</label>
+                  <br>
+                    <select id="category" name="category">
+                        <option value="weight" selected>Weight</option>
+                        <option value="length">Length</option>
+                        <option value="hw">Height and Width</option>
+                    </select>
+                </div>
+                <div id="attributeFields">
+                  <!-- Attribute fields will be added here dynamically -->
+                  <label for="weight">Enter the weight of the fish:</label>
+                  <input type="text" id="weight" name="weight">
+                </div>
+                <input type="submit" value="Predict">
+            </form>
+            <div style="
+              font-weight: 300;
+              font-size: 2.6em;
+              margin: 0.2em 0 0.1em;
+              left:30px;
+              color: #25b82c;
+              align-self: center;" id="result"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.11.3/paper-full.min.js"></script>
+<script src="main.js"></script>
+<script>
+  const categorySelect = document.getElementById('category');
+  const attributeFields = document.getElementById('attributeFields');
+
+  categorySelect.addEventListener('change', function() {
+      const selectedCategory = this.value;
+      attributeFields.innerHTML = '';
+
+      if (selectedCategory === 'weight') {
+          attributeFields.innerHTML = '<label for="weight">Enter the weight of the fish:</label>' +
+                                      '<input type="text" id="weight" name="weight">';
+      } else if (selectedCategory === 'length') {
+          attributeFields.innerHTML = '<label for="length1">Enter the length1 of the fish:</label>' +
+                                      '<input type="text" id="length1" name="length1">' +
+                                      '<label for="length2">Enter the length2 of the fish:</label>' +
+                                      '<input type="text" id="length2" name="length2">' +
+                                      '<label for="length3">Enter the length3 of the fish:</label>' +
+                                      '<input type="text" id="length3" name="length3">';
+      } else if (selectedCategory === 'hw') {
+          attributeFields.innerHTML = '<label for="height">Enter the height of the fish:</label>' +
+                                      '<input type="text" id="height" name="height">' +
+                                      '<label for="width">Enter the width of the fish:</label>' +
+                                      '<input type="text" id="width" name="width">';
+      }
+  });
+
+  const form = document.getElementById('speciesForm');
+  form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+      const formDataJson = {};
+      formData.forEach((value, key) => {
+          formDataJson[key] = value;
+      });
+      console.log(formDataJson);
+       fetch('http://127.0.0.1:5000/predict', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formDataJson),
+          })
+          .then(response => response.json())
+          .then(data => {
+              document.getElementById('result').innerHTML = 'Predicted species: ' + data.predicted_species;
+          })
+          .catch((error) => {
+              console.error('Error:', error);
+          });
+  });
+</script>
+</body>
+</html>
